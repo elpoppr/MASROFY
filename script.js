@@ -58,7 +58,7 @@ function setLanguage(lang) {
 
 function addTransaction(type) {
     const amount = parseFloat(elements.amount.value);
-    const note = elements.note.value.trim() || (appData.language === "ar" ? "áÇ íæÌÏ æÕİ" : "No description");
+    const note = elements.note.value.trim() || (appData.language === "ar" ? "Ù„Ø§ ÙŠÙˆØ¬Ø¯ ÙˆØµÙ" : "No description");
     const category = elements.category.value;
     const date = new Date().toLocaleString(appData.language === "ar" ? "ar-EG" : "en-US", {
         day: 'numeric',
@@ -68,12 +68,12 @@ function addTransaction(type) {
     });
 
     if (isNaN(amount) || amount <= 0) {
-        showToast(appData.language === "ar" ? "ÇáãÈáÛ ÛíÑ ÕÍíÍ!" : "Invalid amount!", "error");
+        showToast(appData.language === "ar" ? "Ø§Ù„Ù…Ø¨Ù„Øº ØºÙŠØ± ØµØ­ÙŠØ­!" : "Invalid amount!", "error");
         return;
     }
 
     if (type === "expense" && amount > appData.balance) {
-        showToast(appData.language === "ar" ? "ÇáÑÕíÏ ÛíÑ ßÇİí!" : "Insufficient balance!", "error");
+        showToast(appData.language === "ar" ? "Ø§Ù„Ø±ØµÙŠØ¯ ØºÙŠØ± ÙƒØ§ÙÙŠ!" : "Insufficient balance!", "error");
         return;
     }
 
@@ -92,17 +92,17 @@ function addTransaction(type) {
     saveData();
     showToast(
         type === "income" 
-            ? (appData.language === "ar" ? "Êã ÅÖÇİÉ ÇáÏÎá ÈäÌÇÍ" : "Income added successfully")
-            : (appData.language === "ar" ? "Êã ÅÖÇİÉ ÇáãÕÑæİ ÈäÌÇÍ" : "Expense added successfully")
+            ? (appData.language === "ar" ? "ØªÙ… Ø¥Ø¶Ø§ÙØ© Ø§Ù„Ø¯Ø®Ù„ Ø¨Ù†Ø¬Ø§Ø­" : "Income added successfully")
+            : (appData.language === "ar" ? "ØªÙ… Ø¥Ø¶Ø§ÙØ© Ø§Ù„Ù…ØµØ±ÙˆÙ Ø¨Ù†Ø¬Ø§Ø­" : "Expense added successfully")
     );
 }
 
 function addGoal() {
     const amount = parseFloat(elements.goalAmount.value);
-    const name = elements.goalName.value.trim() || (appData.language === "ar" ? "åÏİ ÌÏíÏ" : "New goal");
+    const name = elements.goalName.value.trim() || (appData.language === "ar" ? "Ù‡Ø¯Ù Ø¬Ø¯ÙŠØ¯" : "New goal");
 
     if (isNaN(amount) || amount <= 0) {
-        showToast(appData.language === "ar" ? "ãÈáÛ ÇáåÏİ ÛíÑ ÕÍíÍ!" : "Invalid goal amount!", "error");
+        showToast(appData.language === "ar" ? "Ù…Ø¨Ù„Øº Ø§Ù„Ù‡Ø¯Ù ØºÙŠØ± ØµØ­ÙŠØ­!" : "Invalid goal amount!", "error");
         return;
     }
 
@@ -117,11 +117,11 @@ function addGoal() {
     elements.goalName.value = "";
     
     saveData();
-    showToast(appData.language === "ar" ? "Êã ÅÖÇİÉ ÇáåÏİ ÈäÌÇÍ" : "Goal added successfully");
+    showToast(appData.language === "ar" ? "ØªÙ… Ø¥Ø¶Ø§ÙØ© Ø§Ù„Ù‡Ø¯Ù Ø¨Ù†Ø¬Ø§Ø­" : "Goal added successfully");
 }
 
 function updateUI() {
-    elements.balance.textContent = `${appData.balance.toFixed(2)} ${appData.language === "ar" ? "Ìäíå" : "EGP"}`;
+    elements.balance.textContent = `${appData.balance.toFixed(2)} ${appData.language === "ar" ? "Ø¬Ù†ÙŠÙ‡" : "EGP"}`;
     
     const totalIncome = appData.transactions
         .filter(t => t.type === "income")
@@ -146,14 +146,14 @@ function updateUI() {
             <div>
                 <strong>${t.note}</strong>
                 <div style="font-size: 0.8em; color: #666;">
-                    <span>${t.category}</span> • 
+                    <span>${t.category}</span> â€¢ 
                     <span>${t.date}</span>
                 </div>
             </div>
             <div style="font-weight: bold;">
                 ${t.type === "income" ? "+" : "-"}${t.amount.toFixed(2)}
             </div>
-            <button onclick="deleteTransaction(${i})" style="color: #999; border: none; background: none; cursor: pointer;">×</button>
+            <button onclick="deleteTransaction(${i})" style="color: #999; border: none; background: none; cursor: pointer;">Ã—</button>
         `;
         elements.transactions.appendChild(div);
     });
@@ -169,19 +169,19 @@ function updateUI() {
         goalEl.innerHTML = `
             <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                 <h3 style="margin: 0;">${g.name}</h3>
-                <span>${g.saved.toFixed(2)} / ${g.amount.toFixed(2)} ${appData.language === "ar" ? "Ìäíå" : "EGP"}</span>
+                <span>${g.saved.toFixed(2)} / ${g.amount.toFixed(2)} ${appData.language === "ar" ? "Ø¬Ù†ÙŠÙ‡" : "EGP"}</span>
             </div>
             <div style="background: #eee; height: 5px; border-radius: 2.5px; margin-bottom: 5px;">
                 <div style="background: #3498db; height: 100%; border-radius: 2.5px; width: ${progress}%"></div>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.8em; color: #666;">${progress}% ${appData.language === "ar" ? "ãßÊãá" : "completed"}</span>
+                <span style="font-size: 0.8em; color: #666;">${progress}% ${appData.language === "ar" ? "Ù…ÙƒØªÙ…Ù„" : "completed"}</span>
                 <div style="display: flex; gap: 5px;">
                     <button onclick="addToGoal('${g.id}')" style="background: #3498db; color: white; border: none; border-radius: 3px; padding: 3px 8px; font-size: 0.8em; cursor: pointer;">
-                        ${appData.language === "ar" ? "ÅÖÇİÉ" : "Add"}
+                        ${appData.language === "ar" ? "Ø¥Ø¶Ø§ÙØ©" : "Add"}
                     </button>
                     <button onclick="deleteGoal('${g.id}')" style="background: #e74c3c; color: white; border: none; border-radius: 3px; padding: 3px 8px; font-size: 0.8em; cursor: pointer;">
-                        ${appData.language === "ar" ? "ÍĞİ" : "Delete"}
+                        ${appData.language === "ar" ? "Ø­Ø°Ù" : "Delete"}
                     </button>
                 </div>
             </div>
@@ -199,22 +199,22 @@ function addToGoal(goalId) {
     
     const amount = parseFloat(prompt(
         appData.language === "ar" 
-            ? `ÃÏÎá ÇáãÈáÛ áÅÖÇİÊå ááåÏİ "${goal.name}" (ÇáãÊÈŞí: ${remaining.toFixed(2)})`
+            ? `Ø£Ø¯Ø®Ù„ Ø§Ù„Ù…Ø¨Ù„Øº Ù„Ø¥Ø¶Ø§ÙØªÙ‡ Ù„Ù„Ù‡Ø¯Ù "${goal.name}" (Ø§Ù„Ù…ØªØ¨Ù‚ÙŠ: ${remaining.toFixed(2)})`
             : `Enter amount to add to goal "${goal.name}" (Remaining: ${remaining.toFixed(2)})`
     ));
     
     if (isNaN(amount) || amount <= 0) {
-        showToast(appData.language === "ar" ? "ÇáãÈáÛ ÛíÑ ÕÍíÍ!" : "Invalid amount!", "error");
+        showToast(appData.language === "ar" ? "Ø§Ù„Ù…Ø¨Ù„Øº ØºÙŠØ± ØµØ­ÙŠØ­!" : "Invalid amount!", "error");
         return;
     }
     
     if (amount > appData.balance) {
-        showToast(appData.language === "ar" ? "ÇáÑÕíÏ ÛíÑ ßÇİí!" : "Insufficient balance!", "error");
+        showToast(appData.language === "ar" ? "Ø§Ù„Ø±ØµÙŠØ¯ ØºÙŠØ± ÙƒØ§ÙÙŠ!" : "Insufficient balance!", "error");
         return;
     }
     
     if (amount > remaining) {
-        showToast(appData.language === "ar" ? "ÇáãÈáÛ íÊÌÇæÒ ŞíãÉ ÇáåÏİ!" : "Amount exceeds goal target!", "warning");
+        showToast(appData.language === "ar" ? "Ø§Ù„Ù…Ø¨Ù„Øº ÙŠØªØ¬Ø§ÙˆØ² Ù‚ÙŠÙ…Ø© Ø§Ù„Ù‡Ø¯Ù!" : "Amount exceeds goal target!", "warning");
         return;
     }
     
@@ -224,8 +224,8 @@ function addToGoal(goalId) {
     appData.transactions.unshift({
         type: "expense",
         amount: amount,
-        note: appData.language === "ar" ? `ÊæİíÑ ááåÏİ: ${goal.name}` : `Saving for goal: ${goal.name}`,
-        category: appData.language === "ar" ? "ÊæİíÑ" : "Savings",
+        note: appData.language === "ar" ? `ØªÙˆÙÙŠØ± Ù„Ù„Ù‡Ø¯Ù: ${goal.name}` : `Saving for goal: ${goal.name}`,
+        category: appData.language === "ar" ? "ØªÙˆÙÙŠØ±" : "Savings",
         date: new Date().toLocaleString(appData.language === "ar" ? "ar-EG" : "en-US", {
             day: 'numeric',
             month: 'short',
@@ -237,7 +237,7 @@ function addToGoal(goalId) {
     saveData();
     showToast(
         appData.language === "ar" 
-            ? `Êã ÅÖÇİÉ ${amount.toFixed(2)} ááåÏİ "${goal.name}"`
+            ? `ØªÙ… Ø¥Ø¶Ø§ÙØ© ${amount.toFixed(2)} Ù„Ù„Ù‡Ø¯Ù "${goal.name}"`
             : `Added ${amount.toFixed(2)} to goal "${goal.name}"`
     );
 }
@@ -247,7 +247,7 @@ function deleteTransaction(index) {
     appData.balance += transaction.type === "income" ? -transaction.amount : transaction.amount;
     appData.transactions.splice(index, 1);
     saveData();
-    showToast(appData.language === "ar" ? "Êã ÍĞİ ÇáãÚÇãáÉ" : "Transaction deleted");
+    showToast(appData.language === "ar" ? "ØªÙ… Ø­Ø°Ù Ø§Ù„Ù…Ø¹Ø§Ù…Ù„Ø©" : "Transaction deleted");
 }
 
 function deleteGoal(goalId) {
@@ -256,7 +256,7 @@ function deleteGoal(goalId) {
     
     appData.goals.splice(goalIndex, 1);
     saveData();
-    showToast(appData.language === "ar" ? "Êã ÍĞİ ÇáåÏİ" : "Goal deleted");
+    showToast(appData.language === "ar" ? "ØªÙ… Ø­Ø°Ù Ø§Ù„Ù‡Ø¯Ù" : "Goal deleted");
 }
 
 function exportData() {
@@ -271,9 +271,9 @@ function exportData() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = appData.language === "ar" ? "ÈíÇäÇÊ_ÇáãÕÇÑíİ.json" : "expenses_data.json";
+    a.download = appData.language === "ar" ? "Ø¨ÙŠØ§Ù†Ø§Øª_Ø§Ù„Ù…ØµØ§Ø±ÙŠÙ.json" : "expenses_data.json";
     a.click();
-    showToast(appData.language === "ar" ? "Êã ÊÕÏíÑ ÇáÈíÇäÇÊ" : "Data exported");
+    showToast(appData.language === "ar" ? "ØªÙ… ØªØµØ¯ÙŠØ± Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª" : "Data exported");
 }
 
 function importData() {
@@ -301,9 +301,9 @@ function handleFileImport(e) {
             };
             
             saveData();
-            showToast(appData.language === "ar" ? "Êã ÇÓÊíÑÇÏ ÇáÈíÇäÇÊ" : "Data imported");
+            showToast(appData.language === "ar" ? "ØªÙ… Ø§Ø³ØªÙŠØ±Ø§Ø¯ Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª" : "Data imported");
         } catch (error) {
-            showToast(appData.language === "ar" ? "ãáİ ÈíÇäÇÊ ÛíÑ ÕÇáÍ" : "Invalid data file", "error");
+            showToast(appData.language === "ar" ? "Ù…Ù„Ù Ø¨ÙŠØ§Ù†Ø§Øª ØºÙŠØ± ØµØ§Ù„Ø­" : "Invalid data file", "error");
             console.error("Import error:", error);
         }
     };
@@ -321,7 +321,7 @@ function resetData() {
     };
     
     saveData();
-    showToast(appData.language === "ar" ? "Êã ÅÚÇÏÉ ÇáÖÈØ" : "Reset completed");
+    showToast(appData.language === "ar" ? "ØªÙ… Ø¥Ø¹Ø§Ø¯Ø© Ø§Ù„Ø¶Ø¨Ø·" : "Reset completed");
 }
 
 function saveData() {
