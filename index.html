@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق المصروفات الشخصية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مصروفي</title>
     <style>
         :root {
             --primary-color: #3498db;
@@ -213,7 +213,7 @@
             transform: scale(1.1);
         }
         
-        /* رسائل التنبيه */
+        /* تصميم رسائل التنبيه */
         #toast {
             position: fixed;
             bottom: 20px;
@@ -230,7 +230,7 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         
-        /* مربع التأكيد */
+        /* صندوق التأكيد */
         #confirmBox {
             display: none;
             position: fixed;
@@ -277,7 +277,7 @@
             background-color: var(--success-color);
         }
         
-        /* قائمة المعاملات */
+        /* عناصر قائمة المعاملات */
         .transaction-item {
             padding: 12px;
             border-bottom: 1px solid #eee;
@@ -295,8 +295,17 @@
             border-bottom: none;
         }
         
-        /* تنسيق للشاشات الصغيرة */
-        @media (max-width: 768px) {
+        /* تعديلات للغة الإنجليزية */
+        html[dir="ltr"] .transaction-item {
+            text-align: left;
+        }
+        
+        html[dir="ltr"] .input-with-mic {
+            flex-direction: row;
+        }
+
+        /* إضافة استجابة أفضل للشاشات الصغيرة */
+        @media (max-width: 600px) {
             .container {
                 padding: 10px;
             }
@@ -305,36 +314,110 @@
                 padding: 15px;
             }
             
+            /* تحسين عرض حقول الإدخال */
             .input-with-mic {
                 flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
             }
             
-            .mic-switch {
+            .input-with-mic input, 
+            .input-with-mic select {
                 width: 100%;
-                height: 40px;
-                border-radius: 6px;
+            }
+            
+            /* تعديل حجم الخط للشاشات الصغيرة */
+            h1 {
+                font-size: 24px;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+            
+            /* تحسين عرض الأزرار */
+            .btn {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            
+            /* تعديل حجم الخط للرصيد */
+            #balance {
+                font-size: 24px;
+            }
+            
+            /* تحسين عرض قائمة المعاملات */
+            .transaction-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .transaction-item > div:last-child {
+                margin-top: 10px;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            /* تحسين عرض الأهداف */
+            #goalsList > div {
+                padding: 8px;
+            }
+            
+            /* تعديل حجم الخط للتوست */
+            #toast {
+                font-size: 14px;
+                padding: 10px 20px;
             }
         }
-        
-        /* تنسيق للغة الإنجليزية */
-        html[dir="ltr"] .transaction-item {
-            text-align: left;
+
+        /* تعديلات للشاشات المتوسطة */
+        @media (min-width: 601px) and (max-width: 900px) {
+            .container {
+                padding: 15px;
+            }
+            
+            /* تحسين تخطيط البطاقات */
+            .card {
+                padding: 18px;
+            }
         }
-        
-        html[dir="ltr"] .input-with-mic {
-            flex-direction: row;
+
+        /* تعديلات للشاشات الكبيرة جداً */
+        @media (min-width: 1201px) {
+            .container {
+                max-width: 1400px;
+            }
+        }
+
+        /* تحسينات عامة للاستجابة */
+        html {
+            font-size: 16px;
+        }
+
+        @media (max-width: 400px) {
+            html {
+                font-size: 14px;
+            }
+        }
+
+        /* تحسين اتجاه النص للغة الإنجليزية */
+        html[dir="ltr"] {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* منع التكبير على حقول الإدخال في iOS */
+        input, select, textarea {
+            font-size: 16px !important;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- شريط العنوان -->
+        <!-- رأس التطبيق -->
         <div class="card" style="margin-bottom: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h1 style="margin: 0;" class="lang-ar">تطبيق المصروفات الشخصية</h1>
-                <h1 style="margin: 0;" class="lang-en hidden">Personal Expenses App</h1>
+                <h1 style="margin: 0;" class="lang-ar">مصروفي</h1>
+                <h1 style="margin: 0;" class="lang-en hidden">Masrofy App</h1>
                 <div style="display: flex; gap: 10px;">
                     <button id="langAr" class="btn btn-primary">
                         <span class="lang-ar">العربية</span>
@@ -444,7 +527,7 @@
                 </div>
             </div>
 
-            <!-- الأهداف المالية -->
+            <!-- بطاقة الأهداف المالية -->
             <div class="card">
                 <h2 class="lang-ar">الأهداف المالية</h2>
                 <h2 class="lang-en hidden">Financial Goals</h2>
@@ -452,7 +535,7 @@
                     <label class="lang-ar">اسم الهدف</label>
                     <label class="lang-en hidden">Goal Name</label>
                     <div class="input-with-mic">
-                        <input id="goalName" type="text" placeholder="ادخل اسم الهدف">
+                        <input id="goalName" type="text" placeholder="اسم الهدف المالي">
                         <input type="checkbox" id="micGoalNameCheckbox" class="mic-checkbox">
                         <label class="mic-switch" for="micGoalNameCheckbox">
                             <div class="mic-on">
@@ -516,7 +599,7 @@
                 <div id="transactions"></div>
             </div>
 
-            <!-- أدوات إدارة البيانات -->
+            <!-- إدارة البيانات -->
             <div class="card">
                 <h2 class="lang-ar">إدارة البيانات</h2>
                 <h2 class="lang-en hidden">Data Management</h2>
@@ -539,7 +622,7 @@
         </div>
     </div>
 
-    <!-- مربع تأكيد إعادة التعيين -->
+    <!-- صندوق تأكيد إعادة التعيين -->
     <div id="confirmBox">
         <div class="confirm-content">
             <h3 class="lang-ar">تأكيد إعادة التعيين</h3>
@@ -565,5 +648,7 @@
     </div>
 
     <script src="script.js"></script>
+<h2 class="lang-ar">برمجه المهندس:محمد ايهاب</h2>
+                <h2 class="lang-en hidden">programing by Eng:Mohammed ehab</h2>
 </body>
 </html>
