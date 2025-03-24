@@ -1,0 +1,134 @@
+/* === ≈⁄œ«œ«  ⁄«„… === */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===  Œ’Ì’ «·ŒÿÊÿ Ê«·√·Ê«‰ === */
+@layer base {
+    body {
+        @apply font-sans bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-200 transition-colors duration-300;
+    }
+}
+
+/* ===  ’„Ì„ «·√“—«— === */
+@layer components {
+    .btn {
+        @apply px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center shadow-md;
+    }
+    .btn-primary {
+        @apply bg-blue-500 hover:bg-blue-600 text-white;
+    }
+    .btn-success {
+        @apply bg-green-500 hover:bg-green-600 text-white;
+    }
+    .btn-danger {
+        @apply bg-red-500 hover:bg-red-600 text-white;
+    }
+    .btn-warning {
+        @apply bg-yellow-500 hover:bg-yellow-600 text-white;
+    }
+    .btn-secondary {
+        @apply bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600;
+    }
+}
+
+/* ===  ’„Ì„ «·»ÿ«ﬁ«  === */
+.card {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1;
+}
+
+/* ===  ’„Ì„ ‘—Ìÿ «· ‰ﬁ· === */
+.navbar {
+    @apply bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50;
+}
+.navbar-container {
+    @apply container mx-auto px-4 py-3 flex justify-between items-center;
+}
+.navbar-logo {
+    @apply flex items-center space-x-2;
+}
+.navbar-title {
+    @apply text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent;
+}
+.navbar-actions {
+    @apply flex items-center space-x-4;
+}
+.navbar-lang-btn {
+    @apply px-3 py-1 rounded-full text-sm font-medium transition-colors duration-200;
+}
+
+/* ===  ’„Ì„ «·‰„«–Ã === */
+.form-group {
+    @apply relative mb-4;
+}
+.form-group label {
+    @apply block text-sm font-medium mb-1;
+}
+.form-group input,
+.form-group select {
+    @apply w-full p-3 pl-10 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200;
+}
+.form-group span {
+    @apply absolute left-3 top-3.5 text-gray-500;
+}
+
+/* ===  ’„Ì„ «·Ãœ«Ê· Ê«·ﬁÊ«∆„ === */
+.transactions-list {
+    @apply space-y-3 max-h-96 overflow-y-auto pr-2;
+}
+.transaction-item {
+    @apply flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm;
+}
+.transaction-item.income {
+    @apply text-green-600 dark:text-green-400;
+}
+.transaction-item.expense {
+    @apply text-red-600 dark:text-red-400;
+}
+
+/* ===  ’„Ì„ «·≈‘⁄«—«  === */
+.toast {
+    @apply fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate__animated animate__fadeInUp;
+}
+.toast-icon {
+    @apply mr-2;
+}
+
+/* ===  ’„Ì„ ‰«›–… «· √ﬂÌœ === */
+.confirm-box {
+    @apply hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+}
+.confirm-box-content {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 max-w-sm w-full animate__animated animate__zoomIn;
+}
+.confirm-box-message {
+    @apply text-center text-gray-600 dark:text-gray-300 mb-6;
+}
+.confirm-box-actions {
+    @apply flex justify-center space-x-4;
+}
+
+/* ===  Œ’Ì’«  ≈÷«›Ì… === */
+::-webkit-scrollbar {
+    @apply w-2;
+}
+::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+}
+::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 dark:bg-gray-600 rounded-full;
+}
+
+/* ===  √ÀÌ—«  «·Õ—ﬂ… === */
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* ===  Œ’Ì’«  ··Ê÷⁄ «·„Ÿ·„ === */
+.dark .dark\:text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}

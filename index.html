@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> ÿ»Ìﬁ «·„’«—Ì› «·‘Œ’Ì…</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .transaction-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        .income {
+            color: #2ecc71;
+        }
+        .expense {
+            color: #e74c3c;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ‘—Ìÿ «· ‰ﬁ· -->
+        <div class="card" style="margin-bottom: 20px;">
+            <h1 style="margin: 0;"> ÿ»Ìﬁ «·„’«—Ì› «·‘Œ’Ì…</h1>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button id="langAr" class="btn">«·⁄—»Ì…</button>
+                <button id="langEn" class="btn">English</button>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+            <!-- »ÿ«ﬁ… «·—’Ìœ -->
+            <div class="card">
+                <h2 class="lang-ar">—’Ìœﬂ «·Õ«·Ì</h2>
+                <h2 class="lang-en hidden">Your Balance</h2>
+                <p id="balance" style="font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0;">0.00 EGP</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div style="background-color: #e8f8f5; padding: 10px; border-radius: 4px;">
+                        <p class="lang-ar">≈Ã„«·Ì «·œŒ·</p>
+                        <p class="lang-en hidden">Total Income</p>
+                        <p id="totalIncome" style="font-weight: bold;">0.00</p>
+                    </div>
+                    <div style="background-color: #fdedec; padding: 10px; border-radius: 4px;">
+                        <p class="lang-ar">≈Ã„«·Ì «·„’—Ê›« </p>
+                        <p class="lang-en hidden">Total Expenses</p>
+                        <p id="totalExpense" style="font-weight: bold;">0.00</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ≈÷«›… „⁄«„·… ÃœÌœ… -->
+            <div class="card">
+                <h2 class="lang-ar">≈÷«›… „⁄«„·… ÃœÌœ…</h2>
+                <h2 class="lang-en hidden">Add New Transaction</h2>
+                <div style="display: grid; gap: 15px;">
+                    <div>
+                        <label class="lang-ar">«·„»·€</label>
+                        <label class="lang-en hidden">Amount</label>
+                        <input id="amount" type="number" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label class="lang-ar">«·Ê’›</label>
+                        <label class="lang-en hidden">Description</label>
+                        <input id="note" type="text" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label class="lang-ar">«·›∆…</label>
+                        <label class="lang-en hidden">Category</label>
+                        <select id="category" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="⁄«„">⁄«„</option>
+                            <option value="ÿ⁄«„">ÿ⁄«„</option>
+                            <option value="„Ê«’·« ">„Ê«’·« </option>
+                            <option value=" —›ÌÂ"> —›ÌÂ</option>
+                            <option value="›Ê« Ì—">›Ê« Ì—</option>
+                        </select>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button id="addIncome" class="btn btn-success">
+                            <span class="lang-ar">≈÷«›… œŒ·</span>
+                            <span class="lang-en hidden">Add Income</span>
+                        </button>
+                        <button id="addExpense" class="btn btn-danger">
+                            <span class="lang-ar">≈÷«›… „’—Ê›</span>
+                            <span class="lang-en hidden">Add Expense</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ﬁ«∆„… «·„⁄«„·«  -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 class="lang-ar">”Ã· «·„⁄«„·« </h2>
+                    <h2 class="lang-en hidden">Transactions History</h2>
+                    <select id="filter" style="padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="all" class="lang-ar">«·ﬂ·</option>
+                        <option value="all" class="lang-en hidden">All</option>
+                        <option value="income" class="lang-ar">«·œŒ·</option>
+                        <option value="income" class="lang-en hidden">Income</option>
+                        <option value="expense" class="lang-ar">«·„’—Ê›« </option>
+                        <option value="expense" class="lang-en hidden">Expenses</option>
+                    </select>
+                </div>
+                <div id="transactions" style="max-height: 300px; overflow-y: auto;"></div>
+            </div>
+
+            <!-- «·√Âœ«› «·„«·Ì… -->
+            <div class="card">
+                <h2 class="lang-ar">«·√Âœ«› «·„«·Ì…</h2>
+                <h2 class="lang-en hidden">Financial Goals</h2>
+                <div style="display: grid; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <label class="lang-ar">«”„ «·Âœ›</label>
+                        <label class="lang-en hidden">Goal Name</label>
+                        <input id="goalName" type="text" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label class="lang-ar">«·„»·€ «·„” Âœ›</label>
+                        <label class="lang-en hidden">Target Amount</label>
+                        <input id="goalAmount" type="number" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <button id="addGoal" class="btn btn-primary">
+                        <span class="lang-ar">≈÷«›… Âœ›</span>
+                        <span class="lang-en hidden">Add Goal</span>
+                    </button>
+                </div>
+                <div id="goalsList" style="display: grid; gap: 10px;"></div>
+            </div>
+
+            <!-- ≈œ«—… «·»Ì«‰«  -->
+            <div class="card">
+                <h2 class="lang-ar">≈œ«—… «·»Ì«‰« </h2>
+                <h2 class="lang-en hidden">Data Management</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <button id="exportData" class="btn" style="background-color: #f39c12; color: white;">
+                        <span class="lang-ar"> ’œÌ— «·»Ì«‰« </span>
+                        <span class="lang-en hidden">Export Data</span>
+                    </button>
+                    <button id="importData" class="btn" style="background-color: #95a5a6; color: white;">
+                        <span class="lang-ar">«” Ì—«œ «·»Ì«‰« </span>
+                        <span class="lang-en hidden">Import Data</span>
+                    </button>
+                </div>
+                <button id="resetBtn" class="btn btn-danger" style="width: 100%;">
+                    <span class="lang-ar">≈⁄«œ… «·÷»ÿ</span>
+                    <span class="lang-en hidden">Reset Data</span>
+                </button>
+                <input type="file" id="importFile" accept=".json" style="display: none;">
+            </div>
+        </div>
+    </div>
+
+    <!-- ‰«›–… «· √ﬂÌœ -->
+    <div id="confirmBox" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
+        <div style="background: white; padding: 20px; border-radius: 8px; max-width: 400px; width: 100%;">
+            <h3 style="margin-top: 0; text-align: center;" class="lang-ar">Â· √‰  „ √ﬂœø</h3>
+            <h3 style="margin-top: 0; text-align: center;" class="lang-en hidden">Are you sure?</h3>
+            <p style="text-align: center; margin-bottom: 20px;" class="lang-ar">”Ì „ Õ–› Ã„Ì⁄ «·»Ì«‰«  »‘ﬂ· œ«∆„</p>
+            <p style="text-align: center; margin-bottom: 20px;" class="lang-en hidden">All data will be permanently deleted</p>
+            <div style="display: flex; justify-content: center; gap: 10px;">
+                <button id="cancelBtn" class="btn" style="background-color: #95a5a6; color: white;">
+                    <span class="lang-ar">≈·€«¡</span>
+                    <span class="lang-en hidden">Cancel</span>
+                </button>
+                <button id="confirmReset" class="btn btn-danger">
+                    <span class="lang-ar"> √ﬂÌœ</span>
+                    <span class="lang-en hidden">Confirm</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- —”«·… «· ‰»ÌÂ -->
+    <div id="toast" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #333; color: white; padding: 12px 24px; border-radius: 4px; z-index: 1000;">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply font-sans bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-200 transition-colors duration-300;
+    }
+}
+
+@layer components {
+    .btn {
+        @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center;
+    }
+    .btn-primary {
+        @apply bg-blue-500 hover:bg-blue-600 text-white;
+    }
+    .btn-success {
+        @apply bg-green-500 hover:bg-green-600 text-white;
+    }
+    .btn-danger {
+        @apply bg-red-500 hover:bg-red-600 text-white;
+    }
+    .btn-warning {
+        @apply bg-yellow-500 hover:bg-yellow-600 text-white;
+    }
+    .card {
+        @apply bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-all duration-300;
+    }
+}
+
+/*  Œ’Ì’«  ‘—Ìÿ «· „—Ì— */
+::-webkit-scrollbar {
+    @apply w-2;
+}
+::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+}
+::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 dark:bg-gray-600 rounded-full;
+}
+
+/*  √ÀÌ—«  «·Õ—ﬂ… */
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/*  Œ’Ì’«  ··Ê÷⁄ «·„Ÿ·„ */
+.dark .dark\:text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
