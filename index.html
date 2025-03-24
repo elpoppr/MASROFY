@@ -2,71 +2,349 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مصروفي</title>
+    <title>تطبيق المصروفات الشخصية</title>
     <style>
+        :root {
+            --primary-color: #3498db;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --dark-color: #34495e;
+            --light-color: #ecf0f1;
+            --gray-color: #95a5a6;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
             margin: 0;
             padding: 0;
-            color: #333;
+            color: #2c3e50;
+            line-height: 1.6;
         }
+        
         .container {
+            width: 100%;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 15px;
         }
+        
         .card {
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             padding: 20px;
             margin-bottom: 20px;
+            transition: all 0.3s ease;
         }
+        
+        .card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        
+        h1, h2, h3, h4 {
+            margin-top: 0;
+            color: var(--dark-color);
+        }
+        
         .btn {
             padding: 10px 15px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
         }
+        
         .btn-primary {
-            background-color: #3498db;
+            background-color: var(--primary-color);
             color: white;
         }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
         .btn-success {
-            background-color: #2ecc71;
+            background-color: var(--success-color);
             color: white;
         }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
         .btn-danger {
-            background-color: #e74c3c;
+            background-color: var(--danger-color);
             color: white;
         }
-        .transaction-item {
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #d35400;
+        }
+        
+        .income {
+            color: var(--success-color);
+            font-weight: bold;
+        }
+        
+        .expense {
+            color: var(--danger-color);
+            font-weight: bold;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        .input-with-mic {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .input-with-mic input, 
+        .input-with-mic select {
+            flex: 1;
             padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        .input-with-mic input:focus, 
+        .input-with-mic select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        /* تصميم زر الميكروفون */
+        .mic-switch {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--primary-color);
+            color: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .mic-switch:hover {
+            background-color: #2980b9;
+        }
+        
+        .mic-switch.mic-active {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(52, 152, 219, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
+        }
+        
+        .mic-on, .mic-off {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .mic-on {
+            z-index: 4;
+        }
+        
+        .mic-off {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            opacity: 0;
+        }
+        
+        .mic-checkbox {
+            display: none;
+        }
+        
+        .mic-checkbox:checked + .mic-switch {
+            background-color: var(--danger-color);
+        }
+        
+        .mic-checkbox:checked + .mic-switch .mic-off {
+            opacity: 1;
+        }
+        
+        .mic-checkbox:active + .mic-switch {
+            transform: scale(1.1);
+        }
+        
+        /* رسائل التنبيه */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            z-index: 1000;
+            display: none;
+            min-width: 250px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* مربع التأكيد */
+        #confirmBox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .confirm-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .confirm-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* شريط التقدم */
+        .progress-bar {
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        
+        .bg-primary {
+            background-color: var(--primary-color);
+        }
+        
+        .bg-success {
+            background-color: var(--success-color);
+        }
+        
+        /* قائمة المعاملات */
+        .transaction-item {
+            padding: 12px;
             border-bottom: 1px solid #eee;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
         }
-        .income {
-            color: #2ecc71;
+        
+        .transaction-item:hover {
+            background-color: #f8f9fa;
         }
-        .expense {
-            color: #e74c3c;
+        
+        .transaction-item:last-child {
+            border-bottom: none;
         }
-        .hidden {
-            display: none;
+        
+        /* تنسيق للشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .input-with-mic {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            
+            .mic-switch {
+                width: 100%;
+                height: 40px;
+                border-radius: 6px;
+            }
+        }
+        
+        /* تنسيق للغة الإنجليزية */
+        html[dir="ltr"] .transaction-item {
+            text-align: left;
+        }
+        
+        html[dir="ltr"] .input-with-mic {
+            flex-direction: row;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- شريط التنقل -->
+        <!-- شريط العنوان -->
         <div class="card" style="margin-bottom: 20px;">
-            <h1 style="margin: 0;">مصروفي</h1>
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button id="langAr" class="btn">العربية</button>
-                <button id="langEn" class="btn">English</button>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h1 style="margin: 0;" class="lang-ar">تطبيق المصروفات الشخصية</h1>
+                <h1 style="margin: 0;" class="lang-en hidden">Personal Expenses App</h1>
+                <div style="display: flex; gap: 10px;">
+                    <button id="langAr" class="btn btn-primary">
+                        <span class="lang-ar">العربية</span>
+                        <span class="lang-en hidden">Arabic</span>
+                    </button>
+                    <button id="langEn" class="btn btn-primary">
+                        <span class="lang-ar">English</span>
+                        <span class="lang-en hidden">English</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -75,17 +353,17 @@
             <div class="card">
                 <h2 class="lang-ar">رصيدك الحالي</h2>
                 <h2 class="lang-en hidden">Your Balance</h2>
-                <p id="balance" style="font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0;">0.00 EGP</p>
+                <p id="balance" style="font-size: 28px; font-weight: bold; text-align: center; margin: 10px 0; color: var(--primary-color);">0.00 EGP</p>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div style="background-color: #e8f8f5; padding: 10px; border-radius: 4px;">
+                    <div style="background-color: #e8f8f5; padding: 15px; border-radius: 8px;">
                         <p class="lang-ar">إجمالي الدخل</p>
                         <p class="lang-en hidden">Total Income</p>
-                        <p id="totalIncome" style="font-weight: bold;">0.00</p>
+                        <p id="totalIncome" style="font-weight: bold; font-size: 18px; color: var(--success-color);">0.00</p>
                     </div>
-                    <div style="background-color: #fdedec; padding: 10px; border-radius: 4px;">
+                    <div style="background-color: #fdedec; padding: 15px; border-radius: 8px;">
                         <p class="lang-ar">إجمالي المصروفات</p>
                         <p class="lang-en hidden">Total Expenses</p>
-                        <p id="totalExpense" style="font-weight: bold;">0.00</p>
+                        <p id="totalExpense" style="font-weight: bold; font-size: 18px; color: var(--danger-color);">0.00</p>
                     </div>
                 </div>
             </div>
@@ -94,47 +372,139 @@
             <div class="card">
                 <h2 class="lang-ar">إضافة معاملة جديدة</h2>
                 <h2 class="lang-en hidden">Add New Transaction</h2>
-                <div style="display: grid; gap: 15px;">
-                    <div>
-                        <label class="lang-ar">المبلغ</label>
-                        <label class="lang-en hidden">Amount</label>
-                        <input id="amount" type="number" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <div class="input-group">
+                    <label class="lang-ar">المبلغ</label>
+                    <label class="lang-en hidden">Amount</label>
+                    <div class="input-with-mic">
+                        <input id="amount" type="number" placeholder="0.00">
+                        <input type="checkbox" id="micAmountCheckbox" class="mic-checkbox">
+                        <label class="mic-switch" for="micAmountCheckbox">
+                            <div class="mic-on">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0V3z"/>
+                                    <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                                </svg>
+                            </div>
+                            <div class="mic-off">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M13 8c0 .564-.094 1.107-.266 1.613l-.814-.814A4.02 4.02 0 0 0 12 8V7a.5.5 0 0 1 1 0v1zm-5 4c.818 0 1.578-.245 2.212-.667l.718.719a4.973 4.973 0 0 1-2.43.923V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 1 0v1a4 4 0 0 0 4 4zm3-9v4.879L5.158 2.037A3.001 3.001 0 0 1 11 3z"/>
+                                    <path d="M9.486 10.607 5 6.12V8a3 3 0 0 0 4.486 2.607zm-7.84-9.253 12 12 .708-.708-12-12-.708.708z"/>
+                                </svg>
+                            </div>
+                        </label>
                     </div>
-                    <div>
-                        <label class="lang-ar">الوصف</label>
-                        <label class="lang-en hidden">Description</label>
-                        <input id="note" type="text" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div class="input-group">
+                    <label class="lang-ar">الوصف</label>
+                    <label class="lang-en hidden">Description</label>
+                    <div class="input-with-mic">
+                        <input id="note" type="text" placeholder="وصف المعاملة">
+                        <input type="checkbox" id="micNoteCheckbox" class="mic-checkbox">
+                        <label class="mic-switch" for="micNoteCheckbox">
+                            <div class="mic-on">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0V3z"/>
+                                    <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                                </svg>
+                            </div>
+                            <div class="mic-off">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M13 8c0 .564-.094 1.107-.266 1.613l-.814-.814A4.02 4.02 0 0 0 12 8V7a.5.5 0 0 1 1 0v1zm-5 4c.818 0 1.578-.245 2.212-.667l.718.719a4.973 4.973 0 0 1-2.43.923V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 1 0v1a4 4 0 0 0 4 4zm3-9v4.879L5.158 2.037A3.001 3.001 0 0 1 11 3z"/>
+                                    <path d="M9.486 10.607 5 6.12V8a3 3 0 0 0 4.486 2.607zm-7.84-9.253 12 12 .708-.708-12-12-.708.708z"/>
+                                </svg>
+                            </div>
+                        </label>
                     </div>
-                    <div>
-                        <label class="lang-ar">الفئة</label>
-                        <label class="lang-en hidden">Category</label>
-                        <select id="category" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                            <option value="عام">عام</option>
-                            <option value="طعام">طعام</option>
-                            <option value="مواصلات">مواصلات</option>
-                            <option value="ترفيه">ترفيه</option>
-                            <option value="فواتير">فواتير</option>
-                        </select>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <button id="addIncome" class="btn btn-success">
-                            <span class="lang-ar">إضافة دخل</span>
-                            <span class="lang-en hidden">Add Income</span>
-                        </button>
-                        <button id="addExpense" class="btn btn-danger">
-                            <span class="lang-ar">إضافة مصروف</span>
-                            <span class="lang-en hidden">Add Expense</span>
-                        </button>
-                    </div>
+                </div>
+                <div class="input-group">
+                    <label class="lang-ar">الفئة</label>
+                    <label class="lang-en hidden">Category</label>
+                    <select id="category">
+                        <option value="عام" class="lang-ar">عام</option>
+                        <option value="عام" class="lang-en hidden">General</option>
+                        <option value="طعام" class="lang-ar">طعام</option>
+                        <option value="طعام" class="lang-en hidden">Food</option>
+                        <option value="مواصلات" class="lang-ar">مواصلات</option>
+                        <option value="مواصلات" class="lang-en hidden">Transport</option>
+                        <option value="ترفيه" class="lang-ar">ترفيه</option>
+                        <option value="ترفيه" class="lang-en hidden">Entertainment</option>
+                        <option value="فواتير" class="lang-ar">فواتير</option>
+                        <option value="فواتير" class="lang-en hidden">Bills</option>
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                    <button id="addIncome" class="btn btn-success">
+                        <span class="lang-ar">إضافة دخل</span>
+                        <span class="lang-en hidden">Add Income</span>
+                    </button>
+                    <button id="addExpense" class="btn btn-danger">
+                        <span class="lang-ar">إضافة مصروف</span>
+                        <span class="lang-en hidden">Add Expense</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- قائمة المعاملات -->
+            <!-- الأهداف المالية -->
+            <div class="card">
+                <h2 class="lang-ar">الأهداف المالية</h2>
+                <h2 class="lang-en hidden">Financial Goals</h2>
+                <div class="input-group">
+                    <label class="lang-ar">اسم الهدف</label>
+                    <label class="lang-en hidden">Goal Name</label>
+                    <div class="input-with-mic">
+                        <input id="goalName" type="text" placeholder="ادخل اسم الهدف">
+                        <input type="checkbox" id="micGoalNameCheckbox" class="mic-checkbox">
+                        <label class="mic-switch" for="micGoalNameCheckbox">
+                            <div class="mic-on">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0V3z"/>
+                                    <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                                </svg>
+                            </div>
+                            <div class="mic-off">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M13 8c0 .564-.094 1.107-.266 1.613l-.814-.814A4.02 4.02 0 0 0 12 8V7a.5.5 0 0 1 1 0v1zm-5 4c.818 0 1.578-.245 2.212-.667l.718.719a4.973 4.973 0 0 1-2.43.923V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 1 0v1a4 4 0 0 0 4 4zm3-9v4.879L5.158 2.037A3.001 3.001 0 0 1 11 3z"/>
+                                    <path d="M9.486 10.607 5 6.12V8a3 3 0 0 0 4.486 2.607zm-7.84-9.253 12 12 .708-.708-12-12-.708.708z"/>
+                                </svg>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label class="lang-ar">المبلغ المستهدف</label>
+                    <label class="lang-en hidden">Target Amount</label>
+                    <div class="input-with-mic">
+                        <input id="goalAmount" type="number" placeholder="0.00">
+                        <input type="checkbox" id="micGoalAmountCheckbox" class="mic-checkbox">
+                        <label class="mic-switch" for="micGoalAmountCheckbox">
+                            <div class="mic-on">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0V3z"/>
+                                    <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                                </svg>
+                            </div>
+                            <div class="mic-off">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M13 8c0 .564-.094 1.107-.266 1.613l-.814-.814A4.02 4.02 0 0 0 12 8V7a.5.5 0 0 1 1 0v1zm-5 4c.818 0 1.578-.245 2.212-.667l.718.719a4.973 4.973 0 0 1-2.43.923V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 1 0v1a4 4 0 0 0 4 4zm3-9v4.879L5.158 2.037A3.001 3.001 0 0 1 11 3z"/>
+                                    <path d="M9.486 10.607 5 6.12V8a3 3 0 0 0 4.486 2.607zm-7.84-9.253 12 12 .708-.708-12-12-.708.708z"/>
+                                </svg>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <button id="addGoal" class="btn btn-primary" style="margin-top: 15px; width: 100%;">
+                    <span class="lang-ar">إضافة هدف</span>
+                    <span class="lang-en hidden">Add Goal</span>
+                </button>
+                <div id="goalsList" style="margin-top: 20px; display: grid; gap: 15px;"></div>
+            </div>
+
+            <!-- سجل المعاملات -->
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h2 class="lang-ar">سجل المعاملات</h2>
-                    <h2 class="lang-en hidden">Transactions History</h2>
-                    <select id="filter" style="padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                    <h2 style="margin: 0;" class="lang-ar">سجل المعاملات</h2>
+                    <h2 style="margin: 0;" class="lang-en hidden">Transactions History</h2>
+                    <select id="filter" style="padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
                         <option value="all" class="lang-ar">الكل</option>
                         <option value="all" class="lang-en hidden">All</option>
                         <option value="income" class="lang-ar">الدخل</option>
@@ -143,64 +513,41 @@
                         <option value="expense" class="lang-en hidden">Expenses</option>
                     </select>
                 </div>
-                <div id="transactions" style="max-height: 300px; overflow-y: auto;"></div>
+                <div id="transactions"></div>
             </div>
 
-            <!-- الأهداف المالية -->
-            <div class="card">
-                <h2 class="lang-ar">الأهداف المالية</h2>
-                <h2 class="lang-en hidden">Financial Goals</h2>
-                <div style="display: grid; gap: 15px; margin-bottom: 20px;">
-                    <div>
-                        <label class="lang-ar">اسم الهدف</label>
-                        <label class="lang-en hidden">Goal Name</label>
-                        <input id="goalName" type="text" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label class="lang-ar">المبلغ المستهدف</label>
-                        <label class="lang-en hidden">Target Amount</label>
-                        <input id="goalAmount" type="number" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <button id="addGoal" class="btn btn-primary">
-                        <span class="lang-ar">إضافة هدف</span>
-                        <span class="lang-en hidden">Add Goal</span>
-                    </button>
-                </div>
-                <div id="goalsList" style="display: grid; gap: 10px;"></div>
-            </div>
-
-            <!-- إدارة البيانات -->
+            <!-- أدوات إدارة البيانات -->
             <div class="card">
                 <h2 class="lang-ar">إدارة البيانات</h2>
                 <h2 class="lang-en hidden">Data Management</h2>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                    <button id="exportData" class="btn" style="background-color: #f39c12; color: white;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button id="exportData" class="btn btn-primary">
                         <span class="lang-ar">تصدير البيانات</span>
                         <span class="lang-en hidden">Export Data</span>
                     </button>
-                    <button id="importData" class="btn" style="background-color: #95a5a6; color: white;">
+                    <button id="importData" class="btn btn-primary">
                         <span class="lang-ar">استيراد البيانات</span>
                         <span class="lang-en hidden">Import Data</span>
                     </button>
+                    <input type="file" id="importFile" accept=".json" style="display: none;">
+                    <button id="resetBtn" class="btn btn-danger" style="grid-column: span 2;">
+                        <span class="lang-ar">إعادة تعيين البيانات</span>
+                        <span class="lang-en hidden">Reset Data</span>
+                    </button>
                 </div>
-                <button id="resetBtn" class="btn btn-danger" style="width: 100%;">
-                    <span class="lang-ar">إعادة الضبط</span>
-                    <span class="lang-en hidden">Reset Data</span>
-                </button>
-                <input type="file" id="importFile" accept=".json" style="display: none;">
             </div>
         </div>
     </div>
 
-    <!-- نافذة التأكيد -->
-    <div id="confirmBox" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
-        <div style="background: white; padding: 20px; border-radius: 8px; max-width: 400px; width: 100%;">
-            <h3 style="margin-top: 0; text-align: center;" class="lang-ar">هل أنت متأكد؟</h3>
-            <h3 style="margin-top: 0; text-align: center;" class="lang-en hidden">Are you sure?</h3>
-            <p style="text-align: center; margin-bottom: 20px;" class="lang-ar">سيتم حذف جميع البيانات بشكل دائم</p>
-            <p style="text-align: center; margin-bottom: 20px;" class="lang-en hidden">All data will be permanently deleted</p>
-            <div style="display: flex; justify-content: center; gap: 10px;">
-                <button id="cancelBtn" class="btn" style="background-color: #95a5a6; color: white;">
+    <!-- مربع تأكيد إعادة التعيين -->
+    <div id="confirmBox">
+        <div class="confirm-content">
+            <h3 class="lang-ar">تأكيد إعادة التعيين</h3>
+            <h3 class="lang-en hidden">Confirm Reset</h3>
+            <p class="lang-ar">هل أنت متأكد أنك تريد حذف جميع البيانات؟ لا يمكن التراجع عن هذا الإجراء.</p>
+            <p class="lang-en hidden">Are you sure you want to delete all data? This action cannot be undone.</p>
+            <div class="confirm-actions">
+                <button id="cancelBtn" class="btn btn-primary">
                     <span class="lang-ar">إلغاء</span>
                     <span class="lang-en hidden">Cancel</span>
                 </button>
@@ -212,12 +559,11 @@
         </div>
     </div>
 
-    <!-- رسالة التنبيه -->
-    <div id="toast" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #333; color: white; padding: 12px 24px; border-radius: 4px; z-index: 1000;">
+    <!-- رسائل التنبيه -->
+    <div id="toast">
         <span id="toastMessage"></span>
     </div>
 
     <script src="script.js"></script>
-<h1>برمجه المهندس:محمد ايهاب</h1>
 </body>
 </html>
