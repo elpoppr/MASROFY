@@ -1,3 +1,4 @@
+// بيانات التطبيق
 let appData = {
     balance: parseFloat(localStorage.getItem("balance")) || 0,
     transactions: JSON.parse(localStorage.getItem("transactions")) || [],
@@ -5,6 +6,7 @@ let appData = {
     language: localStorage.getItem("language") || "ar"
 };
 
+// عناصر DOM
 const elements = {
     balance: document.getElementById("balance"),
     amount: document.getElementById("amount"),
@@ -30,102 +32,193 @@ const elements = {
     toast: document.getElementById("toast"),
     toastMessage: document.getElementById("toastMessage"),
     langAr: document.getElementById("langAr"),
-    langEn: document.getElementById("langEn")
+    langEn: document.getElementById("langEn"),
+    micAmountCheckbox: document.getElementById("micAmountCheckbox"),
+    micNoteCheckbox: document.getElementById("micNoteCheckbox"),
+    micGoalNameCheckbox: document.getElementById("micGoalNameCheckbox"),
+    micGoalAmountCheckbox: document.getElementById("micGoalAmountCheckbox")
 };
 
+// تهيئة التعرف على الكلام
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition;
+let activeMic = null;
+
+// تهيئة التطبيق
 function initApp() {
     setLanguage(appData.language);
+    setupVoiceRecognition();
+    setupEventListeners();
     updateUI();
 }
 
-function setLanguage(lang) {
-    appData.language = lang;
-    localStorage.setItem("language", lang);
-    
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-    
-    document.querySelectorAll(".lang-ar").forEach(el => {
-        el.classList.toggle("hidden", lang !== "ar");
-    });
-    
-    document.querySelectorAll(".lang-en").forEach(el => {
-        el.classList.toggle("hidden", lang !== "en");
-    });
-    
-    updateUI();
+// إعداد التعرف الصوتي
+function setupVoiceRecognition() {
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = appData.language === "ar" ? "ar-SA" : "en-US";
+        recognition.interimResults = false;
+        
+        recognition.onstart = function() {
+            if (activeMic) {
+                activeMic.classList.add("mic-active");
+            }
+        };
+        
+        recognition.onend = function() {
+            if (activeMic) {
+                activeMic.classList.remove("mic-active");
+                // إيقاف تشغيل السويتش بعد الانتهاء
+                if (activeMic === elements.micAmountCheckbox.nextElementSibling) {
+                    elements.micAmountCheckbox.checked = false;
+                } else if (activeMic === elements.micNoteCheckbox.nextElementSibling) {
+                    elements.micNoteCheckbox.checked = false;
+                } else if (activeMic === elements.micGoalNameCheckbox.nextElementSibling) {
+                    elements.micGoalNameCheckbox.checked = false;
+                } else if (activeMic === elements.micGoalAmountCheckbox.nextElementSibling) {
+                    elements.micGoalAmountCheckbox.checked = false;
+                }
+            }
+            activeMic = null;
+        };
+        
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            
+            if (activeMic === elements.micAmountCheckbox.nextElementSibling) {
+                // معالجة المبالغ المالية
+                const amount = parseFloat(transcript.replace(/[^0-9.]/g, ''));
+                if (!isNaN(amount)) {
+                    elements.amount.value = amount;
+                }
+            } else if (activeMic === elements.micNoteCheckbox.nextElementSibling) {
+                // معالجة الوصف
+                elements.note.value = transcript;
+            } else if (activeMic === elements.micGoalNameCheckbox.nextElementSibling) {
+                // معالجة اسم الهدف
+                elements.goalName.value = transcript;
+            } else if (activeMic === elements.micGoalAmountCheckbox.nextElementSibling) {
+                // معالجة مبلغ الهدف
+                const amount = parseFloat(transcript.replace(/[^0-9.]/g, ''));
+                if (!isNaN(amount)) {
+                    elements.goalAmount.value = amount;
+                }
+            }
+        };
+        
+        recognition.onerror = function(event) {
+            showToast(appData.language === "ar" ? 
+                "حدث خطأ في التعرف على الصوت" : 
+                "Voice recognition error", "error");
+        };
+    } else {
+        showToast(appData.language === "ar" ? 
+            "المتصفح لا يدعم التعرف على الصوت" : 
+            "Browser doesn't support speech recognition", "error");
+    }
 }
 
+// بدء التعرف الصوتي
+function startVoiceRecognition(checkbox) {
+    if (recognition) {
+        activeMic = checkbox.nextElementSibling;
+        recognition.lang = appData.language === "ar" ? "ar-SA" : "en-US";
+        try {
+            recognition.start();
+        } catch (e) {
+            showToast(appData.language === "ar" ? 
+                "لا يمكن بدء التعرف على الصوت" : 
+                "Can't start recognition", "error");
+            checkbox.checked = false;
+        }
+    } else {
+        checkbox.checked = false;
+    }
+}
+
+// إضافة معاملة جديدة
 function addTransaction(type) {
     const amount = parseFloat(elements.amount.value);
-    const note = elements.note.value.trim() || (appData.language === "ar" ? "لا يوجد وصف" : "No description");
+    const note = elements.note.value.trim();
     const category = elements.category.value;
-    const date = new Date().toLocaleString(appData.language === "ar" ? "ar-EG" : "en-US", {
-        day: 'numeric',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-
-    if (isNaN(amount) || amount <= 0) {
-        showToast(appData.language === "ar" ? "المبلغ غير صحيح!" : "Invalid amount!", "error");
-        return;
-    }
-
-    if (type === "expense" && amount > appData.balance) {
-        showToast(appData.language === "ar" ? "الرصيد غير كافي!" : "Insufficient balance!", "error");
-        return;
-    }
-
-    appData.balance += type === "income" ? amount : -amount;
-    appData.transactions.unshift({ 
-        type, 
-        amount, 
-        note, 
-        category, 
-        date
-    });
     
-    elements.amount.value = "";
-    elements.note.value = "";
+    if (isNaN(amount)) {
+        showToast(appData.language === "ar" ? "الرجاء إدخال مبلغ صحيح" : "Please enter a valid amount", "error");
+        return;
+    }
+    
+    if (note === "") {
+        showToast(appData.language === "ar" ? "الرجاء إدخال وصف" : "Please enter a description", "error");
+        return;
+    }
+    
+    const transaction = {
+        id: Date.now(),
+        type,
+        amount,
+        note,
+        category,
+        date: new Date().toISOString()
+    };
+    
+    appData.transactions.push(transaction);
+    
+    if (type === "income") {
+        appData.balance += amount;
+    } else {
+        appData.balance -= amount;
+    }
     
     saveData();
-    showToast(
-        type === "income" 
-            ? (appData.language === "ar" ? "تم إضافة الدخل بنجاح" : "Income added successfully")
-            : (appData.language === "ar" ? "تم إضافة المصروف بنجاح" : "Expense added successfully")
-    );
+    updateUI();
+    resetForm();
+    
+    showToast(appData.language === "ar" ? 
+        `تمت إضافة ${type === "income" ? "دخل" : "مصروف"} بنجاح` : 
+        `${type === "income" ? "Income" : "Expense"} added successfully`, "success");
 }
 
+// إضافة هدف جديد
 function addGoal() {
-    const amount = parseFloat(elements.goalAmount.value);
-    const name = elements.goalName.value.trim() || (appData.language === "ar" ? "هدف جديد" : "New goal");
-
-    if (isNaN(amount) || amount <= 0) {
-        showToast(appData.language === "ar" ? "مبلغ الهدف غير صحيح!" : "Invalid goal amount!", "error");
+    const name = elements.goalName.value.trim();
+    const targetAmount = parseFloat(elements.goalAmount.value);
+    
+    if (name === "") {
+        showToast(appData.language === "ar" ? "الرجاء إدخال اسم الهدف" : "Please enter goal name", "error");
         return;
     }
-
-    appData.goals.unshift({ 
-        name, 
-        amount, 
-        saved: 0,
-        id: Date.now().toString()
-    });
     
-    elements.goalAmount.value = "";
-    elements.goalName.value = "";
+    if (isNaN(targetAmount)) {
+        showToast(appData.language === "ar" ? "الرجاء إدخال مبلغ صحيح" : "Please enter a valid amount", "error");
+        return;
+    }
     
+    const goal = {
+        id: Date.now(),
+        name,
+        targetAmount,
+        savedAmount: 0,
+        createdAt: new Date().toISOString()
+    };
+    
+    appData.goals.push(goal);
     saveData();
-    showToast(appData.language === "ar" ? "تم إضافة الهدف بنجاح" : "Goal added successfully");
+    updateUI();
+    resetGoalForm();
+    
+    showToast(appData.language === "ar" ? "تمت إضافة الهدف بنجاح" : "Goal added successfully", "success");
 }
 
+// تحديث واجهة المستخدم
 function updateUI() {
-    elements.balance.textContent = `${appData.balance.toFixed(2)} ${appData.language === "ar" ? "جنيه" : "EGP"}`;
+    // تحديث الرصيد
+    elements.balance.textContent = `${appData.balance.toFixed(2)} EGP`;
     
+    // تحديث إجمالي الدخل والمصروفات
     const totalIncome = appData.transactions
         .filter(t => t.type === "income")
         .reduce((sum, t) => sum + t.amount, 0);
+    
     const totalExpense = appData.transactions
         .filter(t => t.type === "expense")
         .reduce((sum, t) => sum + t.amount, 0);
@@ -133,186 +226,263 @@ function updateUI() {
     elements.totalIncome.textContent = totalIncome.toFixed(2);
     elements.totalExpense.textContent = totalExpense.toFixed(2);
     
-    const filter = elements.filter.value;
-    const filteredTransactions = filter === "all" 
-        ? appData.transactions 
-        : appData.transactions.filter(t => t.type === filter);
+    // تحديث قائمة المعاملات
+    updateTransactionsList();
     
-    elements.transactions.innerHTML = "";
-    filteredTransactions.forEach((t, i) => {
-        const div = document.createElement("div");
-        div.className = `transaction-item ${t.type}`;
-        div.innerHTML = `
-            <div>
-                <strong>${t.note}</strong>
-                <div style="font-size: 0.8em; color: #666;">
-                    <span>${t.category}</span> • 
-                    <span>${t.date}</span>
-                </div>
-            </div>
-            <div style="font-weight: bold;">
-                ${t.type === "income" ? "+" : "-"}${t.amount.toFixed(2)}
-            </div>
-            <button onclick="deleteTransaction(${i})" style="color: #999; border: none; background: none; cursor: pointer;">×</button>
-        `;
-        elements.transactions.appendChild(div);
-    });
-    
-    elements.goalsList.innerHTML = "";
-    appData.goals.forEach((g, i) => {
-        const progress = Math.min(Math.floor((g.saved / g.amount) * 100), 100);
-        const goalEl = document.createElement("div");
-        goalEl.className = "card";
-        goalEl.style.padding = "10px";
-        goalEl.style.marginBottom = "10px";
-        
-        goalEl.innerHTML = `
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                <h3 style="margin: 0;">${g.name}</h3>
-                <span>${g.saved.toFixed(2)} / ${g.amount.toFixed(2)} ${appData.language === "ar" ? "جنيه" : "EGP"}</span>
-            </div>
-            <div style="background: #eee; height: 5px; border-radius: 2.5px; margin-bottom: 5px;">
-                <div style="background: #3498db; height: 100%; border-radius: 2.5px; width: ${progress}%"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.8em; color: #666;">${progress}% ${appData.language === "ar" ? "مكتمل" : "completed"}</span>
-                <div style="display: flex; gap: 5px;">
-                    <button onclick="addToGoal('${g.id}')" style="background: #3498db; color: white; border: none; border-radius: 3px; padding: 3px 8px; font-size: 0.8em; cursor: pointer;">
-                        ${appData.language === "ar" ? "إضافة" : "Add"}
-                    </button>
-                    <button onclick="deleteGoal('${g.id}')" style="background: #e74c3c; color: white; border: none; border-radius: 3px; padding: 3px 8px; font-size: 0.8em; cursor: pointer;">
-                        ${appData.language === "ar" ? "حذف" : "Delete"}
-                    </button>
-                </div>
-            </div>
-        `;
-        elements.goalsList.appendChild(goalEl);
-    });
+    // تحديث قائمة الأهداف
+    updateGoalsList();
 }
 
-function addToGoal(goalId) {
-    const goalIndex = appData.goals.findIndex(g => g.id === goalId);
-    if (goalIndex === -1) return;
+// تحديث قائمة المعاملات
+function updateTransactionsList() {
+    const filter = elements.filter.value;
+    let transactionsToShow = [...appData.transactions];
     
-    const goal = appData.goals[goalIndex];
-    const remaining = goal.amount - goal.saved;
+    if (filter !== "all") {
+        transactionsToShow = transactionsToShow.filter(t => t.type === filter);
+    }
     
-    const amount = parseFloat(prompt(
-        appData.language === "ar" 
-            ? `أدخل المبلغ لإضافته للهدف "${goal.name}" (المتبقي: ${remaining.toFixed(2)})`
-            : `Enter amount to add to goal "${goal.name}" (Remaining: ${remaining.toFixed(2)})`
-    ));
+    // ترتيب من الأحدث إلى الأقدم
+    transactionsToShow.sort((a, b) => new Date(b.date) - new Date(a.date));
     
-    if (isNaN(amount) || amount <= 0) {
-        showToast(appData.language === "ar" ? "المبلغ غير صحيح!" : "Invalid amount!", "error");
+    let html = "";
+    
+    if (transactionsToShow.length === 0) {
+        html = `<div class="transaction-item">
+            <p class="lang-ar">لا توجد معاملات</p>
+            <p class="lang-en hidden">No transactions</p>
+        </div>`;
+    } else {
+        transactionsToShow.forEach(transaction => {
+            const date = new Date(transaction.date);
+            const formattedDate = date.toLocaleDateString(appData.language === "ar" ? "ar-EG" : "en-US");
+            
+            html += `
+                <div class="transaction-item">
+                    <div>
+                        <p style="margin: 0; font-weight: bold;">${transaction.note}</p>
+                        <small style="color: #777;">${formattedDate} - ${transaction.category}</small>
+                    </div>
+                    <div style="text-align: right;">
+                        <p style="margin: 0; font-weight: bold;" class="${transaction.type}">
+                            ${transaction.type === "income" ? "+" : "-"}${transaction.amount.toFixed(2)}
+                        </p>
+                        <button onclick="deleteTransaction(${transaction.id})" class="btn" style="padding: 2px 5px; font-size: 12px;">
+                            <span class="lang-ar">حذف</span>
+                            <span class="lang-en hidden">Delete</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    elements.transactions.innerHTML = html;
+}
+
+// تحديث قائمة الأهداف
+function updateGoalsList() {
+    let html = "";
+    
+    if (appData.goals.length === 0) {
+        html = `<div style="text-align: center; padding: 10px; color: #777;">
+            <p class="lang-ar">لا توجد أهداف</p>
+            <p class="lang-en hidden">No goals</p>
+        </div>`;
+    } else {
+        appData.goals.forEach(goal => {
+            const progress = Math.min(Math.round((goal.savedAmount / goal.targetAmount) * 100), 100);
+            const progressColor = progress === 100 ? "bg-success" : "bg-primary";
+            
+            html += `
+                <div style="border: 1px solid #eee; border-radius: 8px; padding: 10px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <h4 style="margin: 0;">${goal.name}</h4>
+                        <button onclick="deleteGoal(${goal.id})" class="btn" style="padding: 2px 5px; font-size: 12px;">
+                            <span class="lang-ar">حذف</span>
+                            <span class="lang-en hidden">Delete</span>
+                        </button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>${goal.savedAmount.toFixed(2)} / ${goal.targetAmount.toFixed(2)} EGP</span>
+                        <span>${progress}%</span>
+                    </div>
+                    <div class="progress-bar" style="height: 10px; background-color: #eee; border-radius: 5px; overflow: hidden;">
+                        <div class="${progressColor}" style="height: 100%; width: ${progress}%;"></div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 10px;">
+                        <input type="number" id="add-to-goal-${goal.id}" placeholder="المبلغ" style="padding: 5px;">
+                        <button onclick="addToGoal(${goal.id})" class="btn btn-primary" style="padding: 5px;">
+                            <span class="lang-ar">إضافة</span>
+                            <span class="lang-en hidden">Add</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    elements.goalsList.innerHTML = html;
+}
+
+// حذف معاملة
+function deleteTransaction(id) {
+    const index = appData.transactions.findIndex(t => t.id === id);
+    if (index !== -1) {
+        const transaction = appData.transactions[index];
+        
+        if (transaction.type === "income") {
+            appData.balance -= transaction.amount;
+        } else {
+            appData.balance += transaction.amount;
+        }
+        
+        appData.transactions.splice(index, 1);
+        saveData();
+        updateUI();
+        
+        showToast(appData.language === "ar" ? "تم حذف المعاملة" : "Transaction deleted", "success");
+    }
+}
+
+// حذف هدف
+function deleteGoal(id) {
+    const index = appData.goals.findIndex(g => g.id === id);
+    if (index !== -1) {
+        appData.goals.splice(index, 1);
+        saveData();
+        updateUI();
+        
+        showToast(appData.language === "ar" ? "تم حذف الهدف" : "Goal deleted", "success");
+    }
+}
+
+// إضافة مبلغ إلى الهدف
+function addToGoal(id) {
+    const goal = appData.goals.find(g => g.id === id);
+    if (!goal) return;
+    
+    const input = document.getElementById(`add-to-goal-${id}`);
+    const amount = parseFloat(input.value);
+    
+    if (isNaN(amount)) {
+        showToast(appData.language === "ar" ? "الرجاء إدخال مبلغ صحيح" : "Please enter a valid amount", "error");
+        return;
+    }
+    
+    if (amount <= 0) {
+        showToast(appData.language === "ar" ? "المبلغ يجب أن يكون موجبًا" : "Amount must be positive", "error");
+        return;
+    }
+    
+    if (goal.savedAmount + amount > goal.targetAmount) {
+        showToast(appData.language === "ar" ? "المبلغ يتجاوز الهدف المطلوب" : "Amount exceeds target goal", "error");
         return;
     }
     
     if (amount > appData.balance) {
-        showToast(appData.language === "ar" ? "الرصيد غير كافي!" : "Insufficient balance!", "error");
+        showToast(appData.language === "ar" ? "لا يوجد رصيد كافي" : "Insufficient balance", "error");
         return;
     }
     
-    if (amount > remaining) {
-        showToast(appData.language === "ar" ? "المبلغ يتجاوز قيمة الهدف!" : "Amount exceeds goal target!", "warning");
-        return;
-    }
-    
-    appData.goals[goalIndex].saved += amount;
+    goal.savedAmount += amount;
     appData.balance -= amount;
     
-    appData.transactions.unshift({
+    // إضافة معاملة مصروف
+    const transaction = {
+        id: Date.now(),
         type: "expense",
-        amount: amount,
-        note: appData.language === "ar" ? `توفير للهدف: ${goal.name}` : `Saving for goal: ${goal.name}`,
-        category: appData.language === "ar" ? "توفير" : "Savings",
-        date: new Date().toLocaleString(appData.language === "ar" ? "ar-EG" : "en-US", {
-            day: 'numeric',
-            month: 'short',
-            hour: '2-digit',
-            minute: '2-digit'
-        })
-    });
-    
-    saveData();
-    showToast(
-        appData.language === "ar" 
-            ? `تم إضافة ${amount.toFixed(2)} للهدف "${goal.name}"`
-            : `Added ${amount.toFixed(2)} to goal "${goal.name}"`
-    );
-}
-
-function deleteTransaction(index) {
-    const transaction = appData.transactions[index];
-    appData.balance += transaction.type === "income" ? -transaction.amount : transaction.amount;
-    appData.transactions.splice(index, 1);
-    saveData();
-    showToast(appData.language === "ar" ? "تم حذف المعاملة" : "Transaction deleted");
-}
-
-function deleteGoal(goalId) {
-    const goalIndex = appData.goals.findIndex(g => g.id === goalId);
-    if (goalIndex === -1) return;
-    
-    appData.goals.splice(goalIndex, 1);
-    saveData();
-    showToast(appData.language === "ar" ? "تم حذف الهدف" : "Goal deleted");
-}
-
-function exportData() {
-    const data = {
-        balance: appData.balance,
-        transactions: appData.transactions,
-        goals: appData.goals,
-        language: appData.language
+        amount,
+        note: `إضافة إلى الهدف: ${goal.name}`,
+        category: "goals",
+        date: new Date().toISOString()
     };
     
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = appData.language === "ar" ? "بيانات_المصاريف.json" : "expenses_data.json";
-    a.click();
-    showToast(appData.language === "ar" ? "تم تصدير البيانات" : "Data exported");
+    appData.transactions.push(transaction);
+    saveData();
+    updateUI();
+    input.value = "";
+    
+    showToast(appData.language === "ar" ? "تمت إضافة المبلغ إلى الهدف" : "Amount added to goal", "success");
 }
 
+// تعيين اللغة
+function setLanguage(lang) {
+    appData.language = lang;
+    localStorage.setItem("language", lang);
+    
+    // تحديث اتجاه الصفحة
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+    document.documentElement.lang = lang;
+    
+    // تبديل العناصر المرئية حسب اللغة
+    document.querySelectorAll(".lang-ar").forEach(el => {
+        el.style.display = lang === "ar" ? "block" : "none";
+    });
+    
+    document.querySelectorAll(".lang-en").forEach(el => {
+        el.style.display = lang === "en" ? "block" : "none";
+    });
+    
+    // تحديث واجهة المستخدم
+    updateUI();
+    
+    // تحديث لغة التعرف الصوتي
+    if (recognition) {
+        recognition.lang = lang === "ar" ? "ar-SA" : "en-US";
+    }
+}
+
+// تصدير البيانات
+function exportData() {
+    const dataStr = JSON.stringify(appData);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `expenses-data-${new Date().toISOString().slice(0,10)}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+    
+    showToast(appData.language === "ar" ? "تم تصدير البيانات" : "Data exported", "success");
+}
+
+// استيراد البيانات
 function importData() {
     elements.importFile.click();
 }
 
+// معالجة ملف الاستيراد
 function handleFileImport(e) {
     const file = e.target.files[0];
     if (!file) return;
     
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = function(e) {
         try {
-            const data = JSON.parse(event.target.result);
+            const data = JSON.parse(e.target.result);
             
-            if (typeof data.balance !== "number" || !Array.isArray(data.transactions)) {
-                throw new Error("Invalid data format");
+            // التحقق من صحة البيانات
+            if (data && typeof data.balance === "number" && Array.isArray(data.transactions) && Array.isArray(data.goals)) {
+                appData = data;
+                saveData();
+                updateUI();
+                
+                showToast(appData.language === "ar" ? "تم استيراد البيانات بنجاح" : "Data imported successfully", "success");
+            } else {
+                showToast(appData.language === "ar" ? "ملف غير صالح" : "Invalid file", "error");
             }
-            
-            appData = {
-                balance: data.balance,
-                transactions: data.transactions || [],
-                goals: data.goals || [],
-                language: data.language || "ar"
-            };
-            
-            saveData();
-            showToast(appData.language === "ar" ? "تم استيراد البيانات" : "Data imported");
-        } catch (error) {
-            showToast(appData.language === "ar" ? "ملف بيانات غير صالح" : "Invalid data file", "error");
-            console.error("Import error:", error);
+        } catch (err) {
+            showToast(appData.language === "ar" ? "خطأ في قراءة الملف" : "Error reading file", "error");
         }
     };
     reader.readAsText(file);
-    elements.importFile.value = "";
+    e.target.value = ""; // إعادة تعيين قيمة الإدخال للسماح باستيراد نفس الملف مرة أخرى
 }
 
+// إعادة تعيين البيانات
 function resetData() {
-    elements.confirmBox.style.display = "none";
     appData = {
         balance: 0,
         transactions: [],
@@ -321,31 +491,44 @@ function resetData() {
     };
     
     saveData();
-    showToast(appData.language === "ar" ? "تم إعادة الضبط" : "Reset completed");
-}
-
-function saveData() {
-    localStorage.setItem("balance", appData.balance);
-    localStorage.setItem("transactions", JSON.stringify(appData.transactions));
-    localStorage.setItem("goals", JSON.stringify(appData.goals));
-    localStorage.setItem("language", appData.language);
     updateUI();
+    elements.confirmBox.style.display = "none";
+    
+    showToast(appData.language === "ar" ? "تم إعادة تعيين البيانات" : "Data reset", "success");
 }
 
-function showToast(message, type = "info") {
-    const toast = elements.toast;
-    toast.style.backgroundColor = type === "error" ? "#e74c3c" : 
-                               type === "success" ? "#2ecc71" : 
-                               type === "warning" ? "#f39c12" : "#3498db";
-    
+// عرض رسالة toast
+function showToast(message, type) {
     elements.toastMessage.textContent = message;
-    toast.style.display = "flex";
+    elements.toast.style.backgroundColor = type === "error" ? "#e74c3c" : "#2ecc71";
+    elements.toast.style.display = "block";
     
     setTimeout(() => {
-        toast.style.display = "none";
+        elements.toast.style.display = "none";
     }, 3000);
 }
 
+// حفظ البيانات في localStorage
+function saveData() {
+    localStorage.setItem("balance", appData.balance.toString());
+    localStorage.setItem("transactions", JSON.stringify(appData.transactions));
+    localStorage.setItem("goals", JSON.stringify(appData.goals));
+}
+
+// إعادة تعيين نموذج المعاملة
+function resetForm() {
+    elements.amount.value = "";
+    elements.note.value = "";
+    elements.category.value = "عام";
+}
+
+// إعادة تعيين نموذج الهدف
+function resetGoalForm() {
+    elements.goalName.value = "";
+    elements.goalAmount.value = "";
+}
+
+// إعداد مستمعي الأحداث
 function setupEventListeners() {
     elements.addIncome.addEventListener("click", () => addTransaction("income"));
     elements.addExpense.addEventListener("click", () => addTransaction("expense"));
@@ -363,13 +546,34 @@ function setupEventListeners() {
     elements.confirmReset.addEventListener("click", resetData);
     elements.langAr.addEventListener("click", () => setLanguage("ar"));
     elements.langEn.addEventListener("click", () => setLanguage("en"));
+    
+    // أحداث الميكروفون
+    elements.micAmountCheckbox.addEventListener("change", function() {
+        if (this.checked) {
+            startVoiceRecognition(this);
+        }
+    });
+    elements.micNoteCheckbox.addEventListener("change", function() {
+        if (this.checked) {
+            startVoiceRecognition(this);
+        }
+    });
+    elements.micGoalNameCheckbox.addEventListener("change", function() {
+        if (this.checked) {
+            startVoiceRecognition(this);
+        }
+    });
+    elements.micGoalAmountCheckbox.addEventListener("change", function() {
+        if (this.checked) {
+            startVoiceRecognition(this);
+        }
+    });
 }
 
+// جعل الدوال متاحة عالمياً
 window.deleteTransaction = deleteTransaction;
 window.deleteGoal = deleteGoal;
 window.addToGoal = addToGoal;
 
-document.addEventListener("DOMContentLoaded", () => {
-    setupEventListeners();
-    initApp();
-});
+// تهيئة التطبيق عند تحميل الصفحة
+document.addEventListener("DOMContentLoaded", initApp);
