@@ -44,12 +44,30 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 let recognition;
 let activeMic = null;
 
+// دالة لضبط حجم الخط بناءً على حجم الشاشة
+function adjustFontSize() {
+    const width = window.innerWidth;
+    const html = document.documentElement;
+    
+    if (width < 400) {
+        html.style.fontSize = '14px';
+    } else if (width < 600) {
+        html.style.fontSize = '15px';
+    } else {
+        html.style.fontSize = '16px';
+    }
+}
+
 // تهيئة التطبيق
 function initApp() {
+    adjustFontSize();
     setLanguage(appData.language);
     setupVoiceRecognition();
     setupEventListeners();
     updateUI();
+    
+    // إضافة مستمع لتغيير حجم الشاشة
+    window.addEventListener('resize', adjustFontSize);
 }
 
 // إعداد التعرف الصوتي
